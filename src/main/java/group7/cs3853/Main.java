@@ -1,3 +1,5 @@
+package group7.cs3853;
+
 public class Main {
 
     public static void main(String[] args) {

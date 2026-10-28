@@ -3,7 +3,7 @@ package group7.cs3853;
 public class Main {
 
     public static void main(String[] args) {
-        if (args.length < 17 || args.length > 21) {
+        if (args.length < 16 || args.length > 21) {
             System.err.println("Error: Invalid amount of arguments");
             printUsageInstructions();
             System.exit(1);

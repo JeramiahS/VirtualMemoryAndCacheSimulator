@@ -1,17 +1,22 @@
 package group7.cs3853;
 
+import java.io.FileNotFoundException;
+
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         if (args.length < 16 || args.length > 21) {
             System.err.println("Error: Invalid amount of arguments");
             printUsageInstructions();
             System.exit(1);
         }
 
-        // Build parameter objects from command line args
-        CacheParameters cacheParameters = CacheParameters.buildFromArgs(args);
-        VirtualMemoryParameters virtualMemoryParameters = VirtualMemoryParameters.buildFromArgs(args);
+        // Build simulation objects from command line args
+        VirtualCache virtualCache = VirtualCache.buildFromArgs(args);
+        VirtualMemory virtualMemory = VirtualMemory.buildFromArgs(args);
+        TraceFileContainer traceFileContainer = TraceFileContainer.getTraceFilesFromArgs(args);
+
+        traceFileContainer.printTraceFiles();
     }
 
     public static void printUsageInstructions() {
@@ -24,8 +29,7 @@ public class Main {
         System.out.print("\tp: Simulated physical memory of the computer in mebibytes\n");
         System.out.print("\tu: Simulated percentage of physical memory used by the operating system\n");
         System.out.print("\tn: Instructions/Time Slice value\n");
-        System.out.print("\tf: The name of a trace file (Minimum 1, max 3 files)\n");
-        System.out.print("\n");
+        System.out.print("\tf: The name of a trace file (Minimum 1, max 3 files)\n\n");
     }
 
 }

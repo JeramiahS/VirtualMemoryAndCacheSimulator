@@ -8,6 +8,10 @@ public class Main {
             printUsageInstructions();
             System.exit(1);
         }
+
+        // Build parameter objects from command line args
+        CacheParameters cacheParameters = CacheParameters.buildFromArgs(args);
+        VirtualMemoryParameters virtualMemoryParameters = VirtualMemoryParameters.buildFromArgs(args);
     }
 
     public static void printUsageInstructions() {

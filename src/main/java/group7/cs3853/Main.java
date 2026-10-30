@@ -4,7 +4,7 @@ import java.io.FileNotFoundException;
 
 public class Main {
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) {
         if (args.length < 16 || args.length > 21) {
             System.err.println("Error: Invalid amount of arguments");
             printUsageInstructions();

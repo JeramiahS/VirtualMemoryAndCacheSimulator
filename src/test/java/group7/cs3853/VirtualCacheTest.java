@@ -25,7 +25,7 @@ public class VirtualCacheTest {
 
     @Test
     public void parsedReplacementPolicyCorrectly() {
-        assertEquals("Round Robin", cache.replacementPolicy);
+        assertEquals("Round Robin", cache.replacementPolicy, "Replacement Policy should be Round Robin");
     }
 
     @Test
@@ -35,6 +35,6 @@ public class VirtualCacheTest {
 
     @Test
     public void calculatesCorrectNumberOfBlocks() {
-        assertEquals(32768, cache.getTotalNumberOfBlocks(), "Given a 512 KiB cache with a block size of 16 bytes, there should be 32,768 blocks");
+        assertEquals(32768, cache.getTotalNumberOfBlocks(), "A 512 KiB cache with a block size of 16 bytes should have 32,768 blocks");
     }
 }

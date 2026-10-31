@@ -37,4 +37,34 @@ public class VirtualCacheTest {
     public void calculatesCorrectNumberOfBlocks() {
         assertEquals(32768, cache.getTotalNumberOfBlocks(), "A 512 KiB cache with a block size of 16 bytes should have 32,768 blocks");
     }
+
+    @Test
+    public void calculatesCorrectTagBits() {
+        assertEquals(13, cache.getTagBits(), "Tag size should be 13 bits based on the physical address size.");
+    }
+
+    @Test
+    public void calculatesCorrectIndexBits() {
+        assertEquals(13, cache.getIndexBits(), "An 8,192-row cache should require 13 index bits.");
+    }
+
+    @Test
+    public void calculatesCorrectNumberOfRows() {
+        assertEquals(8192, cache.getTotalNumberOfRows(), "A 32,768-block cache with 4-way associativity should have 8,192 rows.");
+    }
+
+    @Test
+    public void calculatesCorrectOverheadSize() {
+        assertEquals(57344, cache.getOverheadSizeBytes(), "A cache with 32,768 blocks and 14 overhead bits per block should have 57,344 overhead bytes.");
+    }
+
+    @Test
+    public void calculatesCorrectImplementationMemory() {
+        assertEquals(581632, cache.getImplementationMemoryBytes(), "A 512 KiB cache with 57,344 overhead bytes should require 581,632 total implementation bytes.");
+    }
+
+    @Test
+    public void calculatesCorrectImplementationCost() {
+        assertEquals(39.76, cache.getImplementationCost(), 0.001, "A 568 KB implementation at $0.07 per KB should cost $39.76.");
+    }
 }

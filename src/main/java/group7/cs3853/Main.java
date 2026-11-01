@@ -1,7 +1,5 @@
 package group7.cs3853;
 
-import java.io.FileNotFoundException;
-
 public class Main {
 
     public static void main(String[] args) {
@@ -12,11 +10,13 @@ public class Main {
         }
 
         // Build simulation objects from command line args
+        TraceFileContainer traceFiles = TraceFileContainer.getTraceFilesFromArgs(args);
         VirtualCache virtualCache = VirtualCache.buildFromArgs(args);
         VirtualMemory virtualMemory = VirtualMemory.buildFromArgs(args);
-        TraceFileContainer traceFileContainer = TraceFileContainer.getTraceFilesFromArgs(args);
 
-        traceFileContainer.printTraceFiles();
+        traceFiles.printTraceFiles();
+        virtualCache.printCalculatedValues();
+        virtualMemory.printCalculatedValues(traceFiles.fileNames.size());
     }
 
     public static void printUsageInstructions() {

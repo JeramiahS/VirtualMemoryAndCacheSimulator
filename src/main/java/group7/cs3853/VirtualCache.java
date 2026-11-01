@@ -160,4 +160,8 @@ public class VirtualCache {
     private static boolean replacementPolicyMissing() {
         return false;
     }
+
+    public void printCalculatedValues() {
+        // Print stuff
+    }
 }

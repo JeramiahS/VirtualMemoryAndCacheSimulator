@@ -65,8 +65,15 @@ public class VirtualMemory {
         return 1 + Long.numberOfTrailingZeros(getNumberOfPhysicalPages());
     }
 
-    /*public long getPageTableMemoryBytes() {
-        return (524288L * numOfProcesses * getPageTableEntryBits() + 7) / 8;
-    }*/
+    // Number of trace files will be provided by the caller of this method
+    public long getPageTableMemoryBytes(final int numberOfTraceFiles) {
+        return (524288L * numberOfTraceFiles * getPageTableEntryBits() + 7) / 8;
+    }
+
+    // Number of trace files will also be provided by the caller of this method
+    public void printCalculatedValues(final int numberOfTraceFiles) {
+        // Print stuff
+        // System.out.printf("Total RAM for Page Table(s): %5d", numberOfTraceFiles);
+    }
 
 }

@@ -23,4 +23,14 @@ public class VirtualMemoryTest {
         assertEquals(100, virtualMemory.timeSlice);
     }
 
+    @Test
+    public void calculatesCorrectNumOfPhyPages() {assertEquals(262144, virtualMemory.getNumberOfPhysicalPages());}
+
+    @Test
+    public void calculatesCorrectNumOfSysPages() {assertEquals(196608,virtualMemory.getNumberOfSystemPages());}
+
+    @Test
+    public void calculatesCorrectPageTableSizeEntry(){assertEquals(19, virtualMemory.getPageTableEntryBits());}
+
+
 }

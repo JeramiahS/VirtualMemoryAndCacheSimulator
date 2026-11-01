@@ -34,7 +34,39 @@ public class VirtualMemory {
             }
         }
 
+        validateParameters(physicalMemoryMB, percentMemoryUsedByOS, timeSlice);
+
         return new VirtualMemory(physicalMemoryMB, percentMemoryUsedByOS, timeSlice);
     }
+
+    private static void validateParameters(int physicalMemoryMB, int percentMemoryUsedByOS, int timeSlice) {
+        if(physicalMemoryMB < 128 || physicalMemoryMB > 4096 || Integer.bitCount(physicalMemoryMB) != 1) {
+            throw new IllegalArgumentException("Invalid physical memory size.");
+        }
+
+        if(percentMemoryUsedByOS < 0 || percentMemoryUsedByOS > 100) {
+            throw new IllegalArgumentException("Invalid OS memory percentage.");
+        }
+        if(timeSlice != -1 && timeSlice < 1) {
+            throw new IllegalArgumentException("Invalid instruction time slice.");
+        }
+    }
+
+    //number of physical pages
+    public long getNumberOfPhysicalPages() {
+        return(physicalMemoryMB * 1024L * 1024L)/ 4096;
+    }
+    //number of pages by the OS
+    public long getNumberOfSystemPages() {
+        return Math.round(getNumberOfPhysicalPages() * percentMemoryUsedByOS / 100.00);
+    }
+    //page table entry size in bits
+    public long getPageTableEntryBits() {
+        return 1 + Long.numberOfTrailingZeros(getNumberOfPhysicalPages());
+    }
+
+    /*public long getPageTableMemoryBytes() {
+        return (524288L * numOfProcesses * getPageTableEntryBits() + 7) / 8;
+    }*/
 
 }

@@ -161,7 +161,26 @@ public class VirtualCache {
         return false;
     }
 
-    public void printCalculatedValues() {
-        // Print stuff
+    public void printCalculatedValues(VirtualMemory virtMem) {
+
+        //input param
+        System.out.println("\n***** Cache Input Parameters *****\n");
+        System.out.printf("Cache size:\t\t\t\t\t\t%d KB\n", sizeKB);
+        System.out.printf("Block size:\t\t\t\t\t\t%d bytes\n", blockSizeBytes);
+        System.out.printf("Associativity:\t\t\t\t\t%d\n", associativity);
+        System.out.printf("Replacement Policy:\t\t\t\t%s\n", replacementPolicy);
+        System.out.printf("Physical Memory:\t\t\t\t%d MB\n", physicalMemMB);
+        System.out.printf("Percent Memory Used By System: \t%.1f%%\n", (double)virtMem.percentMemoryUsedByOS);
+        System.out.printf("Instructions / Time Slice:\t\t%d\n\n", virtMem.timeSlice);
+
+        //calc. values
+        System.out.println("***** Cache Calculated Values *****\n");
+        System.out.printf("Total # Blocks:\t\t\t\t\t%d\n", getTotalNumberOfBlocks());
+        System.out.printf("Tag Size:\t\t\t\t\t\t%d bits\n", getTagBits());
+        System.out.printf("Index Size:\t\t\t\t\t\t%d bits\n", getIndexBits());
+        System.out.printf("Total # Rows:\t\t\t\t\t%d\n", getTotalNumberOfRows());
+        System.out.printf("Overhead Size:\t\t\t\t\t%d bytes\n", getOverheadSizeBytes());
+        System.out.printf("Implementation Memory Size:\t\t%.2f KB (%d bytes)\n", getImplementationMemoryKB(), getImplementationMemoryBytes());
+        System.out.printf("Cost:\t\t\t\t\t\t\t$%.2f @ %.2f per KB\n\n", getImplementationCost(), cost_per_kb);
     }
 }

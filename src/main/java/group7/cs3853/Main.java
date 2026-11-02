@@ -14,8 +14,9 @@ public class Main {
         VirtualCache virtualCache = VirtualCache.buildFromArgs(args);
         VirtualMemory virtualMemory = VirtualMemory.buildFromArgs(args);
 
+        System.out.println("Cache Simulator - CS 3853 - Team #07\n");
         traceFiles.printTraceFiles();
-        virtualCache.printCalculatedValues();
+        virtualCache.printCalculatedValues(virtualMemory);
         virtualMemory.printCalculatedValues(traceFiles.fileNames.size());
     }
 

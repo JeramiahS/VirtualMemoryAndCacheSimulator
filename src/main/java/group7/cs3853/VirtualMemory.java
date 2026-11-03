@@ -73,11 +73,11 @@ public class VirtualMemory {
     // Number of trace files will also be provided by the caller of this method
     public void printCalculatedValues(final int numberOfTraceFiles) {
         // Print stuff
-        System.out.println("***** Physical Memory Calculated Values *****");
-        System.out.printf("\nNumber of Physical Pages:\t\t%5d\n", getNumberOfPhysicalPages());
-        System.out.printf("Number of Pages for System:\t\t%5d\n", getNumberOfSystemPages());
-        System.out.printf("Size of Page Table Entry:\t %5d bits\n", getPageTableEntryBits());
-        System.out.printf("Total RAM for Page Table(s):\t%5d bytes\n", getPageTableMemoryBytes(numberOfTraceFiles));
+        System.out.print("***** Physical Memory Calculated Values *****\n\n");
+        System.out.printf("Number of Physical Pages:      %d\n", getNumberOfPhysicalPages());
+        System.out.printf("Number of Pages for System:    %d\n", getNumberOfSystemPages());
+        System.out.printf("Size of Page Table Entry:      %d bits\n", getPageTableEntryBits());
+        System.out.printf("Total RAM for Page Table(s):   %d bytes\n", getPageTableMemoryBytes(numberOfTraceFiles));
     }
 
 }

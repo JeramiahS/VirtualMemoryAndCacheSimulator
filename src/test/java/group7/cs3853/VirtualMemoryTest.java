@@ -1,0 +1,42 @@
+package group7.cs3853;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class VirtualMemoryTest {
+    final String[] simulatedArgs = new String[]{"-s", "512", "-b", "16", "-a", "4", "-r", "rr", "-p", "1024", "-n", "100", "-u", "75"};
+    final VirtualMemory virtualMemory = VirtualMemory.buildFromArgs(simulatedArgs);
+    final int NUMBER_OF_TRACE_FILES = 3;
+
+    @Test
+    public void parsedPhysicalMemoryCorrectly() {
+        assertEquals(1024, virtualMemory.physicalMemoryMB);
+    }
+
+    @Test
+    public void parsedPercentMemoryUsedByOSCorrectly() {
+        assertEquals(75, virtualMemory.percentMemoryUsedByOS);
+    }
+
+    @Test
+    public void parsedTimeSliceCorrectly() {
+        assertEquals(100, virtualMemory.timeSlice);
+    }
+
+    @Test
+    public void calculatesCorrectNumOfPhyPages() {assertEquals(262144, virtualMemory.getNumberOfPhysicalPages());}
+
+    @Test
+    public void calculatesCorrectNumOfSysPages() {assertEquals(196608,virtualMemory.getNumberOfSystemPages());}
+
+    @Test
+    public void calculatesCorrectPageTableSizeEntry(){assertEquals(19, virtualMemory.getPageTableEntryBits());}
+
+    @Test
+    public void calculatesCorrectRAMForPageTable() {
+        assertEquals(3735552L, virtualMemory.getPageTableMemoryBytes(NUMBER_OF_TRACE_FILES), "Given 3 trace files whose entries are always 512 KiB, there RAM required for the page tables should be 3,735,552 bytes");
+    }
+
+
+}

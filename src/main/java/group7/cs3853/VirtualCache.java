@@ -160,18 +160,6 @@ public class VirtualCache {
     }
 
     public void printCalculatedValues(VirtualMemory virtMem) {
-
-        //input param
-        System.out.println("\n***** Cache Input Parameters *****\n");
-        System.out.printf("Cache size:                    %d KB\n", sizeKB);
-        System.out.printf("Block size:                    %d bytes\n", blockSizeBytes);
-        System.out.printf("Associativity:                 %d\n", associativity);
-        System.out.printf("Replacement Policy:            %s\n", replacementPolicy);
-        System.out.printf("Physical Memory:               %d MB\n", physicalMemMB);
-        System.out.printf("Percent Memory Used By System: %.1f%%\n", (double)virtMem.percentMemoryUsedByOS);
-        System.out.printf("Instructions/Time Slice:       %d\n\n", virtMem.timeSlice);
-
-        //calc. values
         System.out.println("***** Cache Calculated Values *****\n");
         System.out.printf("Total # Blocks:                %d\n", getTotalNumberOfBlocks());
         System.out.printf("Tag Size:                      %d bits\n", getTagBits());

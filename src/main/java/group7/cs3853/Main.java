@@ -16,6 +16,7 @@ public class Main {
 
         System.out.println("Cache Simulator - CS 3853 - Team #07\n");
         traceFiles.printTraceFiles();
+        printInputParameters(virtualCache, virtualMemory);
         virtualCache.printCalculatedValues(virtualMemory);
         virtualMemory.printCalculatedValues(traceFiles.fileNames.size());
     }
@@ -31,6 +32,17 @@ public class Main {
         System.out.print("\tu: Simulated percentage of physical memory used by the operating system\n");
         System.out.print("\tn: Instructions/Time Slice value\n");
         System.out.print("\tf: The name of a trace file (Minimum 1, max 3 files)\n\n");
+    }
+
+    public static void printInputParameters(VirtualCache cache, VirtualMemory virtualMemory) {
+        System.out.print("*** Cache Input parameters ***\n\n");
+        System.out.printf("Cache Size:                    %d KB\n", cache.sizeKB);
+        System.out.printf("Block Size:                    %d bytes\n", cache.blockSizeBytes);
+        System.out.printf("Associativity:                 %d\n", cache.associativity);
+        System.out.printf("Replacement Policy:            %s\n", cache.replacementPolicy);
+        System.out.printf("Physical Memory:               %d MB\n", cache.physicalMemMB);
+        System.out.printf("Percent Memory Used by System: %d.0%%\n", virtualMemory.percentMemoryUsedByOS);
+        System.out.printf("Instructions / Time Slice:     %d\n", virtualMemory.timeSlice);
     }
 
 }

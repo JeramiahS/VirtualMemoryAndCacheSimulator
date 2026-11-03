@@ -38,5 +38,7 @@ public class TraceFileContainer {
         for (String name : fileNames) {
             System.out.printf("\t %s\n", name);
         }
+
+        System.out.print("\n");
     }
 }

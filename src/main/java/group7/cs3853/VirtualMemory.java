@@ -5,6 +5,9 @@ import java.util.Objects;
 public class VirtualMemory {
     public final int physicalMemoryMB, percentMemoryUsedByOS, timeSlice;
 
+    private static final int PAGE_SIZE_BYTES = 4096;
+    private static final int NUMBER_OF_PAGE_TABLE_ENTRIES = 524288;
+
     // Private constructor to keep instantiation logic within the class
     private VirtualMemory(int physicalMemoryMB, int percentMemoryUsedByOS, int timeSlice) {
         this.physicalMemoryMB = physicalMemoryMB;
@@ -47,19 +50,21 @@ public class VirtualMemory {
         if(percentMemoryUsedByOS < 0 || percentMemoryUsedByOS > 100) {
             throw new IllegalArgumentException("Invalid OS memory percentage.");
         }
-        if(timeSlice != -1 && timeSlice < 1) {
+        if(timeSlice == 0 || timeSlice < -1) {
             throw new IllegalArgumentException("Invalid instruction time slice.");
         }
     }
 
     //number of physical pages
     public long getNumberOfPhysicalPages() {
-        return(physicalMemoryMB * 1024L * 1024L)/ 4096;
+        return(physicalMemoryMB * 1024L * 1024L)/ PAGE_SIZE_BYTES;
     }
+
     //number of pages by the OS
     public long getNumberOfSystemPages() {
-        return Math.round(getNumberOfPhysicalPages() * percentMemoryUsedByOS / 100.00);
+        return Math.round(getNumberOfPhysicalPages() * (percentMemoryUsedByOS / 100f));
     }
+
     //page table entry size in bits
     public long getPageTableEntryBits() {
         return 1 + Long.numberOfTrailingZeros(getNumberOfPhysicalPages());
@@ -67,12 +72,12 @@ public class VirtualMemory {
 
     // Number of trace files will be provided by the caller of this method
     public long getPageTableMemoryBytes(final int numberOfTraceFiles) {
-        return (524288L * numberOfTraceFiles * getPageTableEntryBits() + 7) / 8;
+        final int bitsInByte = 8;
+        return (NUMBER_OF_PAGE_TABLE_ENTRIES * numberOfTraceFiles * getPageTableEntryBits()) / bitsInByte;
     }
 
     // Number of trace files will also be provided by the caller of this method
     public void printCalculatedValues(final int numberOfTraceFiles) {
-        // Print stuff
         System.out.print("***** Physical Memory Calculated Values *****\n\n");
         System.out.printf("Number of Physical Pages:      %d\n", getNumberOfPhysicalPages());
         System.out.printf("Number of Pages for System:    %d\n", getNumberOfSystemPages());

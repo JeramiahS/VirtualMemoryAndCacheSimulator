@@ -2,7 +2,7 @@ package group7.cs3853;
 
 public class Main {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         if (args.length < 16 || args.length > 21) {
             System.err.println("Error: Invalid amount of arguments");
             printUsageInstructions();
@@ -14,10 +14,10 @@ public class Main {
         VirtualCache virtualCache = VirtualCache.buildFromArgs(args);
         VirtualMemory virtualMemory = VirtualMemory.buildFromArgs(args);
 
-        System.out.println("Cache Simulator - CS 3853 - Team #07\n");
+        System.out.print("Cache Simulator - CS 3853 - Team #07\n\n");
         traceFiles.printTraceFiles();
         printInputParameters(virtualCache, virtualMemory);
-        virtualCache.printCalculatedValues(virtualMemory);
+        virtualCache.printCalculatedValues();
         virtualMemory.printCalculatedValues(traceFiles.fileNames.size());
     }
 
@@ -42,7 +42,7 @@ public class Main {
         System.out.printf("Replacement Policy:            %s\n", cache.replacementPolicy);
         System.out.printf("Physical Memory:               %d MB\n", cache.physicalMemMB);
         System.out.printf("Percent Memory Used by System: %d.0%%\n", virtualMemory.percentMemoryUsedByOS);
-        System.out.printf("Instructions / Time Slice:     %d\n", virtualMemory.timeSlice);
+        System.out.printf("Instructions / Time Slice:     %d\n\n", virtualMemory.timeSlice);
     }
 
 }

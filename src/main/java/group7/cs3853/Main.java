@@ -2,7 +2,7 @@ package group7.cs3853;
 
 public class Main {
 
-    static void main(String[] args) {
+    public static void main(String[] args) {
         if (args.length < 16 || args.length > 21) {
             System.err.println("Error: Invalid amount of arguments");
             printUsageInstructions();
@@ -19,6 +19,7 @@ public class Main {
         printInputParameters(virtualCache, virtualMemory);
         virtualCache.printCalculatedValues();
         virtualMemory.printCalculatedValues(traceFiles.fileNames.size());
+        virtualMemory.printSimulationResults(); //Milestone #2
     }
 
     public static void printUsageInstructions() {

@@ -75,6 +75,10 @@ public class VirtualMemory {
         final int bitsInByte = 8;
         return (NUMBER_OF_PAGE_TABLE_ENTRIES * numberOfTraceFiles * getPageTableEntryBits()) / bitsInByte;
     }
+    //Number of pages available to user
+    public long getNumberOfAvailablePages() {
+        return getNumberOfPhysicalPages() - getNumberOfSystemPages();
+    }
 
     // Number of trace files will also be provided by the caller of this method
     public void printCalculatedValues(final int numberOfTraceFiles) {
@@ -82,7 +86,18 @@ public class VirtualMemory {
         System.out.printf("Number of Physical Pages:      %d\n", getNumberOfPhysicalPages());
         System.out.printf("Number of Pages for System:    %d\n", getNumberOfSystemPages());
         System.out.printf("Size of Page Table Entry:      %d bits\n", getPageTableEntryBits());
-        System.out.printf("Total RAM for Page Table(s):   %d bytes\n", getPageTableMemoryBytes(numberOfTraceFiles));
+        System.out.printf("Total RAM for Page Table(s):   %d bytes\n\n", getPageTableMemoryBytes(numberOfTraceFiles));
+    }
+
+    // Prints results for the Virtual Memory Simulation (will add more results once trace files are extracted)
+    public void printSimulationResults() {
+        System.out.print("***** VIRTUAL MEMORY SIMULATION RESULTS *****\n\n");
+
+        System.out.printf("Physical Pages Used By SYSTEM: %d\n",
+                getNumberOfSystemPages());
+
+        System.out.printf("Pages Available to User:       %d\n",
+                getNumberOfAvailablePages());
     }
 
 }

@@ -37,6 +37,11 @@ public class VirtualMemoryTest {
     public void calculatesCorrectRAMForPageTable() {
         assertEquals(3735552L, virtualMemory.getPageTableMemoryBytes(NUMBER_OF_TRACE_FILES), "Given 3 trace files whose entries are always 512 KiB, there RAM required for the page tables should be 3,735,552 bytes");
     }
+    @Test
+    public void calculatesCorrectNumberOfSystemPages() {assertEquals(196608, virtualMemory.getNumberOfSystemPages());}
+
+    @Test
+    public void calculatesCorrectNumberOfAvailablePages() {assertEquals(65536, virtualMemory.getNumberOfAvailablePages());}
 
 
 }

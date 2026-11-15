@@ -1,5 +1,7 @@
 package group7.cs3853;
 
+import java.nio.file.Path;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -19,7 +21,23 @@ public class Main {
         printInputParameters(virtualCache, virtualMemory);
         virtualCache.printCalculatedValues();
         virtualMemory.printCalculatedValues(traceFiles.fileNames.size());
-        virtualMemory.printSimulationResults(); //Milestone #2
+
+        // *** MILESTONE 2 ***
+        for (String filename : traceFiles.fileNames) {
+            TraceFileProcessor processor = new TraceFileProcessor(
+                    Path.of(filename),
+                    traceFiles.fileNames.indexOf(filename),
+                    virtualMemory.getNumberOfAvailablePages()
+            );
+
+            // Execute a page table simulation on the trace file
+            processor.executePageTableSimulation();
+
+            // Store the results
+            virtualMemory.storeSimulationResults(processor);
+        }
+
+        virtualMemory.printSimulationResults();
     }
 
     public static void printUsageInstructions() {

@@ -8,11 +8,18 @@ public class VirtualMemory {
     private static final int PAGE_SIZE_BYTES = 4096;
     private static final int NUMBER_OF_PAGE_TABLE_ENTRIES = 524288;
 
+    // Milestone 2 variables
+    public int totalVirtualPagesMapped, totalPageTableHits, totalPagesFromFree, totalPageFaults;
+
     // Private constructor to keep instantiation logic within the class
     private VirtualMemory(int physicalMemoryMB, int percentMemoryUsedByOS, int timeSlice) {
         this.physicalMemoryMB = physicalMemoryMB;
         this.percentMemoryUsedByOS = percentMemoryUsedByOS;
         this.timeSlice = timeSlice;
+        this.totalVirtualPagesMapped = 0;
+        this.totalPageTableHits = 0;
+        this.totalPagesFromFree = 0;
+        this.totalPageFaults = 0;
     }
 
     // Returns a VirtualMemory object parsed form cmd line args
@@ -80,6 +87,13 @@ public class VirtualMemory {
         return getNumberOfPhysicalPages() - getNumberOfSystemPages();
     }
 
+    public void storeSimulationResults(TraceFileProcessor processor) {
+        this.totalVirtualPagesMapped += processor.getVirtualPagesMapped();
+        this.totalPageTableHits += processor.getPageTableHits();
+        this.totalPagesFromFree += processor.getPagesFromFree();
+        this.totalPageFaults += processor.getPageFaults();
+    }
+
     // Number of trace files will also be provided by the caller of this method
     public void printCalculatedValues(final int numberOfTraceFiles) {
         System.out.print("***** Physical Memory Calculated Values *****\n\n");
@@ -93,11 +107,15 @@ public class VirtualMemory {
     public void printSimulationResults() {
         System.out.print("***** VIRTUAL MEMORY SIMULATION RESULTS *****\n\n");
 
-        System.out.printf("Physical Pages Used By SYSTEM: %d\n",
-                getNumberOfSystemPages());
-
-        System.out.printf("Pages Available to User:       %d\n",
-                getNumberOfAvailablePages());
+        System.out.printf("Physical Pages Used By SYSTEM: %d\n", getNumberOfSystemPages());
+        System.out.printf("Pages Available to User:       %d\n\n", getNumberOfAvailablePages());
+        System.out.printf("Virtual Pages Mapped:          %d\n", this.totalVirtualPagesMapped);
+        System.out.print("        -----------------------------\n");
+        System.out.printf("        Page Table Hits:       %d\n\n", this.totalPageTableHits);
+        System.out.printf("        Pages From Free:       %d\n\n", this.totalPagesFromFree);
+        System.out.printf("        Total Page Faults:     %d\n\n", this.totalPageFaults);
+        System.out.print("Page Table Usage Per Process:\n");
+        System.out.print("-----------------------------\n");
     }
 
 }

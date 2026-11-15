@@ -35,12 +35,13 @@ public class VirtualCache {
                 case "-b" -> blockSizeBytes = Integer.parseInt(args[++i]);
                 case "-a" -> associativity = Integer.parseInt(args[++i]);
                 case "-r" -> {
-                    if (args[i + 1].equalsIgnoreCase("rr")) {
+                    final String policy = args[++i];
+                    if (policy.equalsIgnoreCase("rr")) {
                         replacementPolicy = "Round Robin";
-                    } else if (args[i + 1].equalsIgnoreCase("rnd")) {
+                    } else if (policy.equalsIgnoreCase("rnd")) {
                         replacementPolicy = "Random";
                     } else {
-                        throw new IllegalArgumentException("Invalid replacement policy: " + args[i + 1]);
+                        throw new IllegalArgumentException("Invalid replacement policy: " + policy);
                     }
                 }
                 case "-p" -> physicalMemMB = Integer.parseInt(args[++i]);
@@ -116,25 +117,20 @@ public class VirtualCache {
 
     // Physical address bits
     public int getPhysicalAddressBits() {
-        return 20 + Integer.numberOfTrailingZeros(physicalMemMB);
+        final long physicalMemorySizeBytes = physicalMemMB * 1024L * 1024L;
+        return Long.numberOfTrailingZeros(physicalMemorySizeBytes);
     }
 
     // Tag bits
     public int getTagBits() {
-        return getPhysicalAddressBits()
-                - getIndexBits()
-                - getOffsetBits();
+        return getPhysicalAddressBits() - getIndexBits() - getOffsetBits();
     }
 
     // Overhead size
     public long getOverheadSizeBytes() {
-
         long bitsPerBlock = getTagBits() + 1L;
-
         long totalBits = getTotalNumberOfBlocks() * bitsPerBlock;
-
-        // Round up to the nearest whole byte
-        return (totalBits + 7) / 8;
+        return (totalBits + 7) / 8; // Round up to the nearest whole byte using integer division rounding
     }
 
     // implementation memory
@@ -159,8 +155,8 @@ public class VirtualCache {
         return false;
     }
 
-    public void printCalculatedValues(VirtualMemory virtMem) {
-        System.out.println("***** Cache Calculated Values *****\n");
+    public void printCalculatedValues() {
+        System.out.print("***** Cache Calculated Values *****\n\n");
         System.out.printf("Total # Blocks:                %d\n", getTotalNumberOfBlocks());
         System.out.printf("Tag Size:                      %d bits\n", getTagBits());
         System.out.printf("Index Size:                    %d bits\n", getIndexBits());

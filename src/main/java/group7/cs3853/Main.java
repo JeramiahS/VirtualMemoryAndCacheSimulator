@@ -1,10 +1,11 @@
 package group7.cs3853;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 
 public class Main {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         if (args.length < 16 || args.length > 21) {
             System.err.println("Error: Invalid amount of arguments");
             printUsageInstructions();
@@ -22,22 +23,35 @@ public class Main {
         virtualCache.printCalculatedValues();
         virtualMemory.printCalculatedValues(traceFiles.fileNames.size());
 
+        ArrayList<TraceFileProcessor> processes = new ArrayList<>(traceFiles.fileNames.size());
+
         // *** MILESTONE 2 ***
+
+        // Create a page table process for each trace file
         for (String filename : traceFiles.fileNames) {
-            TraceFileProcessor processor = new TraceFileProcessor(
-                    Path.of(filename),
-                    traceFiles.fileNames.indexOf(filename),
-                    virtualMemory.getNumberOfAvailablePages()
+            processes.add(
+                    new TraceFileProcessor(
+                            Path.of(filename),
+                            traceFiles.fileNames.indexOf(filename),
+                            virtualMemory.getNumberOfAvailablePages()
+                    )
             );
+        }
 
-            // Execute a page table simulation on the trace file
+        // Process each trace file and store the results
+        for (TraceFileProcessor processor : processes) {
             processor.executePageTableSimulation();
-
-            // Store the results
             virtualMemory.storeSimulationResults(processor);
         }
 
-        virtualMemory.printSimulationResults();
+        virtualMemory.printSimulationTotals();
+        System.out.println("Page Table Usage Per Process:");
+        System.out.println("-----------------------------");
+
+        for (TraceFileProcessor processor : processes) {
+            processor.printResultsForTraceFile(virtualMemory.getPageTableEntryBits());
+        }
+
     }
 
     public static void printUsageInstructions() {
@@ -54,7 +68,7 @@ public class Main {
     }
 
     public static void printInputParameters(VirtualCache cache, VirtualMemory virtualMemory) {
-        System.out.print("*** Cache Input parameters ***\n\n");
+        System.out.print("***** Cache Input parameters *****\n\n");
         System.out.printf("Cache Size:                    %d KB\n", cache.sizeKB);
         System.out.printf("Block Size:                    %d bytes\n", cache.blockSizeBytes);
         System.out.printf("Associativity:                 %d\n", cache.associativity);

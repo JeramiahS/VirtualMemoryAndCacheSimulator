@@ -104,7 +104,7 @@ public class VirtualMemory {
     }
 
     // Prints results for the Virtual Memory Simulation (will add more results once trace files are extracted)
-    public void printSimulationResults() {
+    public void printSimulationTotals() {
         System.out.print("***** VIRTUAL MEMORY SIMULATION RESULTS *****\n\n");
 
         System.out.printf("Physical Pages Used By SYSTEM: %d\n", getNumberOfSystemPages());
@@ -114,8 +114,6 @@ public class VirtualMemory {
         System.out.printf("        Page Table Hits:       %d\n\n", this.totalPageTableHits);
         System.out.printf("        Pages From Free:       %d\n\n", this.totalPagesFromFree);
         System.out.printf("        Total Page Faults:     %d\n\n", this.totalPageFaults);
-        System.out.print("Page Table Usage Per Process:\n");
-        System.out.print("-----------------------------\n");
     }
 
 }

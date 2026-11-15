@@ -160,26 +160,25 @@ public class TraceFileProcessor {
         }
     }
 
-    private int divideRoundedUp (int value, int divisor) {
-        return (value + divisor - 1) / divisor;
+    private int divideRoundedUp (long value) {
+        return Math.toIntExact((value + (long) 8 - 1) / (long) 8);
     }
 
     private float getPageTableUsagePercentage () {
         return 100f * ((float)pageTable.size() / (float)NUMBER_OF_PAGE_TABLE_ENTRIES);
     }
 
-    private int getBytesOfPageTableWasted (int bitsPerPageTableEntry) {
-        final int bitsInByte = 8;
-        final int allocatedBytesForPageTable = divideRoundedUp(NUMBER_OF_PAGE_TABLE_ENTRIES * bitsPerPageTableEntry, bitsInByte);
-        final int bytesUsedToStoreEntries = divideRoundedUp(pageTable.size() * bitsPerPageTableEntry, bitsInByte);
+    private int getBytesOfPageTableWasted (long bitsPerPageTableEntry) {
+        final int allocatedBytesForPageTable = divideRoundedUp(NUMBER_OF_PAGE_TABLE_ENTRIES * bitsPerPageTableEntry);
+        final int bytesUsedToStoreEntries = divideRoundedUp(pageTable.size() * bitsPerPageTableEntry);
 
         return allocatedBytesForPageTable - bytesUsedToStoreEntries;
     }
 
-    public void printResultsForTraceFile (int sizeOfPageTableEntry) {
+    public void printResultsForTraceFile (long sizeOfPageTableEntry) {
         System.out.printf("[%d] %s:\n", this.indexOfFile, filepath.getFileName());
-        System.out.printf("\tUsed Page Table Entries: %d (%.2f)\n", pageTable.size(), getPageTableUsagePercentage());
-        System.out.printf("\tPage Table Wasted: %d\n\n", getBytesOfPageTableWasted(sizeOfPageTableEntry));
+        System.out.printf("\tUsed Page Table Entries: %d (%.2f%%)\n", pageTable.size(), getPageTableUsagePercentage());
+        System.out.printf("\tPage Table Wasted: %d bytes\n\n", getBytesOfPageTableWasted(sizeOfPageTableEntry));
     }
 
 }

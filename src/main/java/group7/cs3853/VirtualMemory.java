@@ -114,6 +114,8 @@ public class VirtualMemory {
         System.out.printf("        Page Table Hits:       %d\n\n", this.totalPageTableHits);
         System.out.printf("        Pages From Free:       %d\n\n", this.totalPagesFromFree);
         System.out.printf("        Total Page Faults:     %d\n\n", this.totalPageFaults);
+        System.out.println("Page Table Usage Per Process:");
+        System.out.println("-----------------------------");
     }
 
 }

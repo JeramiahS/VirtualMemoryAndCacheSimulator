@@ -23,9 +23,10 @@ public class Main {
         virtualCache.printCalculatedValues();
         virtualMemory.printCalculatedValues(traceFiles.fileNames.size());
 
-        ArrayList<TraceFileProcessor> processes = new ArrayList<>(traceFiles.fileNames.size());
-
         // *** MILESTONE 2 ***
+
+        // Create a container for each page table sub-processes, one for each trace file
+        ArrayList<TraceFileProcessor> processes = new ArrayList<>(traceFiles.fileNames.size());
 
         // Create a page table process for each trace file
         for (String filename : traceFiles.fileNames) {
@@ -44,10 +45,10 @@ public class Main {
             virtualMemory.storeSimulationResults(processor);
         }
 
+        // Print cumulative simulation results
         virtualMemory.printSimulationTotals();
-        System.out.println("Page Table Usage Per Process:");
-        System.out.println("-----------------------------");
 
+        // Print individual results for each page table sub-process
         for (TraceFileProcessor processor : processes) {
             processor.printResultsForTraceFile(virtualMemory.getPageTableEntryBits());
         }

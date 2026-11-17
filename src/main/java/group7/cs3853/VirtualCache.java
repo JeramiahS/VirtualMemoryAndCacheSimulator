@@ -163,6 +163,6 @@ public class VirtualCache {
         System.out.printf("Total # Rows:                  %d\n", getTotalNumberOfRows());
         System.out.printf("Overhead Size:                 %d bytes\n", getOverheadSizeBytes());
         System.out.printf("Implementation Memory Size:    %.2f KB (%d bytes)\n", getImplementationMemoryKB(), getImplementationMemoryBytes());
-        System.out.printf("Cost:                          $%.2f @ %.2f per KB\n\n", getImplementationCost(), cost_per_kb);
+        System.out.printf("Cost:                          $%.2f @ $%.2f per KB\n\n", getImplementationCost(), cost_per_kb);
     }
 }

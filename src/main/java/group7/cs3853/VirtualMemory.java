@@ -87,7 +87,7 @@ public class VirtualMemory {
         return getNumberOfPhysicalPages() - getNumberOfSystemPages();
     }
 
-    public void storeSimulationResults(TraceFileProcessor processor) {
+    public void storeSimulationResults(PageTableData processor) {
         this.totalVirtualPagesMapped += processor.getVirtualPagesMapped();
         this.totalPageTableHits += processor.getPageTableHits();
         this.totalPagesFromFree += processor.getPagesFromFree();

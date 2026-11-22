@@ -1,7 +1,8 @@
 package group7.cs3853;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
 
@@ -13,53 +14,86 @@ public class Main {
         }
 
         // Build simulation objects from command line args
-        TraceFileContainer traceFiles = TraceFileContainer.getTraceFilesFromArgs(args);
-        VirtualCache virtualCache = VirtualCache.buildFromArgs(args);
-        VirtualMemory virtualMemory = VirtualMemory.buildFromArgs(args);
+        final VirtualCache virtualCache = VirtualCache.buildFromArgs(args);
+        final VirtualMemory virtualMemory = VirtualMemory.buildFromArgs(args);
+
+        // Create data structures to hold the data within the trace files
+        final ArrayList<TraceFile> traceFiles = new ArrayList<>();
+        getTraceFilesFromArgs(args, traceFiles);
+
+        // Use virtual threads to load each trace file into memory simultaneously
+        // This avoids having to read each trace file twice for each simulation
+        try(ExecutorService traceFileReaderService = Executors.newVirtualThreadPerTaskExecutor()) {
+            for (TraceFile traceFile : traceFiles) {
+                traceFileReaderService.submit(traceFile);
+            }
+            traceFileReaderService.shutdown();
+        }
 
         System.out.print("Cache Simulator - CS 3853 - Team #07\n\n");
-        traceFiles.printTraceFiles();
+        printTraceFileNames(traceFiles);
         printInputParameters(virtualCache, virtualMemory);
         virtualCache.printCalculatedValues();
-        virtualMemory.printCalculatedValues(traceFiles.fileNames.size());
+        virtualMemory.printCalculatedValues(traceFiles.size());
 
-        // *** MILESTONE 2 ***
-
-        // Create a container for each page table sub-processes, one for each trace file
-        ArrayList<TraceFileProcessor> processes = new ArrayList<>(traceFiles.fileNames.size());
-
-        // Create a page table process for each trace file
-        for (String filename : traceFiles.fileNames) {
-            processes.add(
-                    new TraceFileProcessor(
-                            Path.of(filename),
-                            traceFiles.fileNames.indexOf(filename),
+        // Create an ArrayList to hold the page table data for each trace file
+        final ArrayList<PageTableData> pageTableDataArrayList = new ArrayList<>(traceFiles.size());
+        for (TraceFile traceFile : traceFiles) {
+            pageTableDataArrayList.add(
+                    new PageTableData(
+                            traceFile,
+                            traceFiles.indexOf(traceFile),
                             virtualMemory.getNumberOfAvailablePages()
                     )
             );
         }
 
-        // Process each trace file and store the results
-        for (TraceFileProcessor processor : processes) {
-            processor.executePageTableSimulation();
-            virtualMemory.storeSimulationResults(processor);
+        // Create an ArrayList to hold the cache simulation data for each trace file
+        final ArrayList<CacheSimulationData> cacheSimulationDataArrayList = new ArrayList<>(traceFiles.size());
+        for (TraceFile traceFile : traceFiles) {
+            cacheSimulationDataArrayList.add(new CacheSimulationData(traceFile.memoryAccesses, virtualCache));
         }
 
-        // Print cumulative simulation results
+        // Create a subprocess for each trace file to perform the page table simulation
+        try (ExecutorService pageTableSubprocessService = Executors.newFixedThreadPool(traceFiles.size())) {
+            for (PageTableData data : pageTableDataArrayList) {
+                pageTableSubprocessService.submit(data);
+            }
+            pageTableSubprocessService.shutdown();
+        }
+
+        // Create a subprocess for each trace file to perform the cache simulation
+        try (ExecutorService cacheSimulationSubprocessService = Executors.newFixedThreadPool(traceFiles.size())) {
+            for (CacheSimulationData data : cacheSimulationDataArrayList) {
+                cacheSimulationSubprocessService.submit(data);
+            }
+            cacheSimulationSubprocessService.shutdown();
+        }
+
+        // Store the page table simulation results
+        for (PageTableData data : pageTableDataArrayList) {
+            virtualMemory.storeSimulationResults(data);
+        }
+
+        // Store the cache simulation results
+        for (CacheSimulationData data : cacheSimulationDataArrayList) {
+            virtualCache.storeCacheSimulationData(data);
+        }
+
+        // Print all simulation results
         virtualMemory.printSimulationTotals();
-
-        // Print individual results for each page table sub-process
-        for (TraceFileProcessor processor : processes) {
-            processor.printResultsForTraceFile(virtualMemory.getPageTableEntryBits());
+        for (PageTableData data : pageTableDataArrayList) {
+            data.printResultsForTraceFile(virtualMemory.getPageTableEntryBits());
         }
 
+        virtualCache.printSimulationResults(virtualMemory.totalVirtualPagesMapped);
     }
 
-    public static void printUsageInstructions() {
+    public static void printUsageInstructions () {
         System.out.print("Usage: java -jar CacheSim.jar <-s> <-b> <-a> <-r> <-p> <-u> <-n> <-f> [-f] [-f]\n\n");
         System.out.print("Arguments:\n");
         System.out.print("\ts: Cache size in kibibytes\n");
-        System.out.print("\tb: Cache block size in bytes\n");
+        System.out.print("\tb: Cache blocks size in bytes\n");
         System.out.print("\ta: Cache associativity value\n");
         System.out.print("\tr: Cache replacement policy\n");
         System.out.print("\tp: Simulated physical memory of the computer in mebibytes\n");
@@ -68,7 +102,19 @@ public class Main {
         System.out.print("\tf: The name of a trace file (Minimum 1, max 3 files)\n\n");
     }
 
-    public static void printInputParameters(VirtualCache cache, VirtualMemory virtualMemory) {
+    public static void getTraceFilesFromArgs (String[] args, ArrayList<TraceFile> traceFiles) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-f")) traceFiles.add(new TraceFile(args[i+1]));
+        }
+    }
+
+    public static void printTraceFileNames (ArrayList<TraceFile> traceFiles) {
+        System.out.println("Trace file(s):");
+        for (TraceFile traceFile : traceFiles) System.out.print("\t" + traceFile.getTraceFileName() + "\n");
+        System.out.print("\n");
+    }
+
+    public static void printInputParameters (VirtualCache cache, VirtualMemory virtualMemory) {
         System.out.print("***** Cache Input parameters *****\n\n");
         System.out.printf("Cache Size:                    %d KB\n", cache.sizeKB);
         System.out.printf("Block Size:                    %d bytes\n", cache.blockSizeBytes);

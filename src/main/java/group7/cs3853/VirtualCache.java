@@ -7,6 +7,15 @@ public class VirtualCache {
     public final String replacementPolicy;
     private static final double cost_per_kb = 0.07;
 
+    public int totalCacheAccesses;
+    public int totalInstructionBytesRead;
+    public int totalSrcDstBytesRead;
+    public int totalCacheHits;
+    public int totalCacheMisses;
+    public int totalCompulsoryMisses;
+    public int totalConflictMisses;
+    public int totalCacheBlocksUsed;
+
     // Private constructor to prevent object creation from outside the class
     private VirtualCache(int sizeKB, int blockSizeBytes, int associativity, String replacementPolicy, int physicalMemMB) {
         this.sizeKB = sizeKB;
@@ -14,6 +23,15 @@ public class VirtualCache {
         this.associativity = associativity;
         this.replacementPolicy = replacementPolicy;
         this.physicalMemMB = physicalMemMB;
+
+        this.totalCacheAccesses = 0;
+        this.totalInstructionBytesRead = 0;
+        this.totalSrcDstBytesRead = 0;
+        this.totalCacheHits = 0;
+        this.totalCacheMisses = 0;
+        this.totalCompulsoryMisses = 0;
+        this.totalConflictMisses = 0;
+        this.totalCacheBlocksUsed = 0;
     }
 
     // Ensure a Cache object can only be created from cmd line args
@@ -66,7 +84,7 @@ public class VirtualCache {
 
         if (blockSizeBytes != 8 && blockSizeBytes != 16 &&
                 blockSizeBytes != 32 && blockSizeBytes != 64) {
-            throw new IllegalArgumentException("Invalid block size.");
+            throw new IllegalArgumentException("Invalid blocks size.");
         }
 
         if (associativity != 1 && associativity != 2 &&
@@ -155,7 +173,18 @@ public class VirtualCache {
         return false;
     }
 
-    public void printCalculatedValues() {
+    public void storeCacheSimulationData (CacheSimulationData data) {
+        this.totalCacheAccesses += data.totalCacheAccesses;
+        this.totalInstructionBytesRead += data.instructionBytesRead;
+        this.totalSrcDstBytesRead += data.srcDstBytesRead;
+        this.totalCacheHits += data.numberOfCacheHits;
+        this.totalCacheMisses += data.getTotalCacheMisses();
+        this.totalCompulsoryMisses += data.numberOfCompulsoryMisses;
+        this.totalConflictMisses += data.numberOfConflictMisses;
+        this.totalCacheBlocksUsed += data.getCacheBlocksUsed();
+    }
+
+    public void printCalculatedValues () {
         System.out.print("***** Cache Calculated Values *****\n\n");
         System.out.printf("Total # Blocks:                %d\n", getTotalNumberOfBlocks());
         System.out.printf("Tag Size:                      %d bits\n", getTagBits());
@@ -164,5 +193,25 @@ public class VirtualCache {
         System.out.printf("Overhead Size:                 %d bytes\n", getOverheadSizeBytes());
         System.out.printf("Implementation Memory Size:    %.2f KB (%d bytes)\n", getImplementationMemoryKB(), getImplementationMemoryBytes());
         System.out.printf("Cost:                          $%.2f @ $%.2f per KB\n\n", getImplementationCost(), cost_per_kb);
+    }
+
+    public void printSimulationResults (int virtualPagesMapped) {
+        System.out.print("***** CACHE SIMULATION RESULTS *****\n\n");
+        System.out.printf("Total Cache Accesses:  %d (%d addresses)\n", this.totalCacheAccesses, virtualPagesMapped);
+        System.out.printf("--- Instruction Bytes: %d\n", this.totalInstructionBytesRead);
+        System.out.printf("--- SrcDst Bytes:      %d\n", this.totalSrcDstBytesRead);
+        System.out.printf("Cache Hits:            %d\n", this.totalCacheHits);
+        System.out.printf("Cache Misses:          %d\n", this.totalCacheMisses);
+        System.out.printf("--- Compulsory Misses: %d\n", this.totalCompulsoryMisses);
+        System.out.printf("--- Conflict Misses:   %d\n\n", this.totalConflictMisses);
+        System.out.print("***** ***** CACHE HIT & MISS RATE: ***** *****\n\n");
+        final float cacheHitRate = (this.totalCacheHits * 100f) / this.totalCacheAccesses;
+        System.out.printf("Hit  Rate:           %.4f%%\n", cacheHitRate);
+        System.out.printf("Miss Rate:           %.4f%%\n", 100f - cacheHitRate);
+        // TODO: Finish this print statement
+        System.out.printf("CPI:                 %d PLACEHOLDER\n", 0);
+        // TODO: Finish this print statement
+        System.out.printf("Unused Cache Space:  %.2f / %.2f = %.2f%% Waste: $%.2f/chip PLACEHOLDER\n", 0.00f, 0.00f, 0.00f, 0.00f);
+        System.out.printf("Unused Cache Blocks: %d / %d\n\n", this.totalCacheBlocksUsed, this.getTotalNumberOfBlocks());
     }
 }

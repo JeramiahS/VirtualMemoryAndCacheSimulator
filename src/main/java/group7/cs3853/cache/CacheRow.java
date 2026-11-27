@@ -1,4 +1,4 @@
-package group7.cs3853;
+package group7.cs3853.cache;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -9,7 +9,6 @@ public class CacheRow {
     public ArrayList<Long> blocks;
     private final int associativity;
     private final String replacementPolicy;
-    private int index;
 
     private final ArrayDeque<Integer> queue;
 
@@ -18,29 +17,27 @@ public class CacheRow {
         this.replacementPolicy = replacementPolicy;
         this.blocks = new ArrayList<>(associativity);
         this.queue = new ArrayDeque<>(associativity);
-        this.index = 0;
     }
 
-    public boolean tagCanBeInsertedIntoBlock () {
-        return this.index != associativity;
+    public void insertIntoFreeBlock (long tagBits) {
+        this.blocks.add(tagBits);
+        queue.offer(this.blocks.indexOf(tagBits));
     }
 
-    public void insertTagBitsIntoBlock (long tagBits) {
-        blocks.add(this.index, tagBits);
-        queue.offer(this.index);
-        this.index += 1;
+    public boolean blocksAreFull () {
+        return this.blocks.size() == this.associativity;
     }
 
-    /// Evicts a blocks chosen by the replacement policy and replaces the existing tag with the provided tag
-    public void evictAndReplaceBlock (long tagBits) {
+    public void evictAndReplaceCacheBlock (long tagBits) {
         if (replacementPolicy.equals("Random")) {
             final int indexToReplace = ThreadLocalRandom.current().nextInt(this.associativity);
-            blocks.add(indexToReplace, tagBits);
+            this.blocks.set(indexToReplace, tagBits);
         } else {
             Objects.requireNonNull(queue.peek());
             final int indexToReplace = queue.poll();
-            blocks.add(indexToReplace, tagBits);
+            this.blocks.set(indexToReplace, tagBits);
             queue.offer(indexToReplace);
         }
     }
+
 }

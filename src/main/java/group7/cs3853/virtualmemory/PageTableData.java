@@ -1,4 +1,7 @@
-package group7.cs3853;
+package group7.cs3853.virtualmemory;
+
+import group7.cs3853.tracefile.MemoryAccess;
+import group7.cs3853.tracefile.TraceFile;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

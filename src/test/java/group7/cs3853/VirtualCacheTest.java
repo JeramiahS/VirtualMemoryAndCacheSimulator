@@ -1,5 +1,6 @@
 package group7.cs3853;
 
+import group7.cs3853.cache.VirtualCache;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

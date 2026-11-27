@@ -1,4 +1,4 @@
-package group7.cs3853;
+package group7.cs3853.tracefile;
 
 import java.io.BufferedReader;
 import java.io.IOException;

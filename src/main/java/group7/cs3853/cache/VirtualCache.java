@@ -1,20 +1,25 @@
-package group7.cs3853;
+package group7.cs3853.cache;
 
+import group7.cs3853.tracefile.MemoryAccess;
+
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class VirtualCache {
     public final int sizeKB, blockSizeBytes, associativity, physicalMemMB;
     public final String replacementPolicy;
     private static final double cost_per_kb = 0.07;
 
-    public int totalCacheAccesses;
-    public int totalInstructionBytesRead;
-    public int totalSrcDstBytesRead;
-    public int totalCacheHits;
-    public int totalCacheMisses;
-    public int totalCompulsoryMisses;
-    public int totalConflictMisses;
-    public int totalCacheBlocksUsed;
+    private final ConcurrentHashMap<Long, CacheRow> cpuCache;
+    protected int totalCacheAccesses;
+    protected int totalInstructionBytesRead;
+    protected int totalSrcDstBytesRead;
+    protected int totalCacheHits;
+    protected int totalCacheMisses;
+    protected int totalCompulsoryMisses;
+    protected int totalConflictMisses;
+    protected int totalCacheBlocksUsed;
 
     // Private constructor to prevent object creation from outside the class
     private VirtualCache(int sizeKB, int blockSizeBytes, int associativity, String replacementPolicy, int physicalMemMB) {
@@ -23,14 +28,15 @@ public class VirtualCache {
         this.associativity = associativity;
         this.replacementPolicy = replacementPolicy;
         this.physicalMemMB = physicalMemMB;
+        this.cpuCache = new ConcurrentHashMap<>();
 
-        this.totalCacheAccesses = 0;
-        this.totalInstructionBytesRead = 0;
-        this.totalSrcDstBytesRead = 0;
-        this.totalCacheHits = 0;
+        this.totalCacheAccesses = (0);
+        this.totalInstructionBytesRead = (0);
+        this.totalSrcDstBytesRead = (0);
+        this.totalCacheHits = (0);
         this.totalCacheMisses = 0;
-        this.totalCompulsoryMisses = 0;
-        this.totalConflictMisses = 0;
+        this.totalCompulsoryMisses = (0);
+        this.totalConflictMisses = (0);
         this.totalCacheBlocksUsed = 0;
     }
 
@@ -173,15 +179,105 @@ public class VirtualCache {
         return false;
     }
 
-    public void storeCacheSimulationData (CacheSimulationData data) {
-        this.totalCacheAccesses += data.totalCacheAccesses;
-        this.totalInstructionBytesRead += data.instructionBytesRead;
-        this.totalSrcDstBytesRead += data.srcDstBytesRead;
-        this.totalCacheHits += data.numberOfCacheHits;
-        this.totalCacheMisses += data.getTotalCacheMisses();
-        this.totalCompulsoryMisses += data.numberOfCompulsoryMisses;
-        this.totalConflictMisses += data.numberOfConflictMisses;
-        this.totalCacheBlocksUsed += data.getCacheBlocksUsed();
+    // CPU Cache methods
+    public void addToInstructionBytesRead (int bytesRead) {
+        this.totalInstructionBytesRead += bytesRead;
+    }
+
+    public void addToSrcDstBytesRead (int bytesRead) {
+        this.totalSrcDstBytesRead += bytesRead;
+    }
+
+    public void incrementTotalCacheAccesses () {
+        this.totalCacheAccesses += 1;
+    }
+
+    public boolean isValidBitSetAtIndex (long indexBits) {
+        return cpuCache.containsKey(indexBits);
+    }
+
+    public boolean rowIsFull (long indexBits) {
+        return cpuCache.get(indexBits).blocksAreFull();
+    }
+
+    public void incrementTotalCacheHits () {
+        this.totalCacheHits += 1;
+    }
+
+    public boolean isCacheHit (long indexBits, long tagBits) {
+        return cpuCache.get(indexBits).blocks.contains(tagBits);
+    }
+
+    public void handleCompulsoryMiss (long indexBits, long tagBits) {
+        this.totalCompulsoryMisses += 1;
+        final CacheRow row = cpuCache.computeIfAbsent(
+                indexBits,
+                k -> new CacheRow(this.associativity, this.replacementPolicy)
+        );
+        if (row.blocksAreFull()) {
+            row.evictAndReplaceCacheBlock(tagBits);
+        } else {
+            row.insertIntoFreeBlock(tagBits);
+        }
+    }
+
+    public void handleConflictMiss (long indexBits, long tagBits) {
+        this.totalConflictMisses += 1;
+        cpuCache.get(indexBits).evictAndReplaceCacheBlock(tagBits);
+    }
+
+    public void executeSimulation (ArrayList<MemoryAccess> memoryAccesses) {
+        executeSimulation(memoryAccesses, 0);
+    }
+
+    public void executeSimulation (ArrayList<MemoryAccess> memoryAccesses, int processId) {
+
+        for (MemoryAccess memoryAccess : memoryAccesses) {
+            // Determine the start and end virtual addresses based on number of bytes read at the start address
+            final long startingVirtualAddress = memoryAccess.virtualAddress();
+            final long endVirtualAddress = startingVirtualAddress + (memoryAccess.bytesRead() - 1L);
+
+            // Determine the cache indexes accessed based on the start and end addresses
+            final long firstBlockNumber = startingVirtualAddress >>> this.getOffsetBits();
+            final long lastBlockNumber = endVirtualAddress >>> this.getOffsetBits();
+
+            // Store the appropriate amount of bytes read based on memory address origin
+            if (memoryAccess.origin().equals("EIP")) addToInstructionBytesRead(memoryAccess.bytesRead());
+            else addToSrcDstBytesRead(memoryAccess.bytesRead());
+
+            // Check the cache for each index accessed
+            for (long blockNumber = firstBlockNumber; blockNumber <= lastBlockNumber; blockNumber++) {
+                incrementTotalCacheAccesses();
+
+                // Extract the memory address and the corresponding index and tag bits
+                final long address = blockNumber << this.getOffsetBits();
+                final long indexBits = extractIndexBitsFromVirtualAddress(address);
+                final long tagBits = extractTagBitsFromVirtualAddress(address) | (Integer.toUnsignedLong(processId) << 32);
+
+                // Check the cache
+                if (isValidBitSetAtIndex(indexBits)) {
+                    if (isCacheHit(indexBits, tagBits)) {
+                        incrementTotalCacheHits();
+                    } else if (!rowIsFull(indexBits)) {
+                        handleCompulsoryMiss(indexBits, tagBits);
+                    } else {
+                        handleConflictMiss(indexBits, tagBits);
+                    }
+                } else {
+                    // The index is invalid, handle the compulsory miss
+                    handleCompulsoryMiss(indexBits, tagBits);
+                }
+            }
+        }
+    }
+
+    private long extractIndexBitsFromVirtualAddress (long virtualAddress) {
+        final long indexMask = (1L << this.getIndexBits()) - 1L;
+        return (virtualAddress >>> this.getOffsetBits()) & indexMask;
+    }
+
+    private long extractTagBitsFromVirtualAddress (long virtualAddress) {
+        return virtualAddress >>> (this.getOffsetBits() + this.getIndexBits());
     }
 
     public void printCalculatedValues () {
@@ -201,7 +297,7 @@ public class VirtualCache {
         System.out.printf("--- Instruction Bytes: %d\n", this.totalInstructionBytesRead);
         System.out.printf("--- SrcDst Bytes:      %d\n", this.totalSrcDstBytesRead);
         System.out.printf("Cache Hits:            %d\n", this.totalCacheHits);
-        System.out.printf("Cache Misses:          %d\n", this.totalCacheMisses);
+        System.out.printf("Cache Misses:          %d\n", this.totalCompulsoryMisses + this.totalConflictMisses);
         System.out.printf("--- Compulsory Misses: %d\n", this.totalCompulsoryMisses);
         System.out.printf("--- Conflict Misses:   %d\n\n", this.totalConflictMisses);
         System.out.print("***** ***** CACHE HIT & MISS RATE: ***** *****\n\n");
@@ -211,7 +307,7 @@ public class VirtualCache {
         // TODO: Finish this print statement
         System.out.printf("CPI:                 %d PLACEHOLDER\n", 0);
         // TODO: Finish this print statement
-        System.out.printf("Unused Cache Space:  %.2f / %.2f = %.2f%% Waste: $%.2f/chip PLACEHOLDER\n", 0.00f, 0.00f, 0.00f, 0.00f);
+        System.out.printf("Unused Cache Space:  %.2f / %.2f = %.2f%% Waste: $%.2f/chip PLACEHOLDER\n", 0f, 0f, 0f, 0f);
         System.out.printf("Unused Cache Blocks: %d / %d\n\n", this.totalCacheBlocksUsed, this.getTotalNumberOfBlocks());
     }
 }

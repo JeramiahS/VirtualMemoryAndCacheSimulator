@@ -1,6 +1,12 @@
 package group7.cs3853;
 
+import group7.cs3853.cache.VirtualCache;
+import group7.cs3853.tracefile.TraceFile;
+import group7.cs3853.virtualmemory.PageTableData;
+import group7.cs3853.virtualmemory.VirtualMemory;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -48,12 +54,6 @@ public class Main {
             );
         }
 
-        // Create an ArrayList to hold the cache simulation data for each trace file
-        final ArrayList<CacheSimulationData> cacheSimulationDataArrayList = new ArrayList<>(traceFiles.size());
-        for (TraceFile traceFile : traceFiles) {
-            cacheSimulationDataArrayList.add(new CacheSimulationData(traceFile.memoryAccesses, virtualCache));
-        }
-
         // Create a subprocess for each trace file to perform the page table simulation
         try (ExecutorService pageTableSubprocessService = Executors.newFixedThreadPool(traceFiles.size())) {
             for (PageTableData data : pageTableDataArrayList) {
@@ -62,22 +62,13 @@ public class Main {
             pageTableSubprocessService.shutdown();
         }
 
-        // Create a subprocess for each trace file to perform the cache simulation
-        try (ExecutorService cacheSimulationSubprocessService = Executors.newFixedThreadPool(traceFiles.size())) {
-            for (CacheSimulationData data : cacheSimulationDataArrayList) {
-                cacheSimulationSubprocessService.submit(data);
-            }
-            cacheSimulationSubprocessService.shutdown();
-        }
-
         // Store the page table simulation results
         for (PageTableData data : pageTableDataArrayList) {
             virtualMemory.storeSimulationResults(data);
         }
 
-        // Store the cache simulation results
-        for (CacheSimulationData data : cacheSimulationDataArrayList) {
-            virtualCache.storeCacheSimulationData(data);
+        for (int processId = 0; processId < traceFiles.size(); processId++) {
+            virtualCache.executeSimulation(traceFiles.get(processId).memoryAccesses, processId);
         }
 
         // Print all simulation results
